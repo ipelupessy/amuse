@@ -4,15 +4,15 @@ import numpy
 
 from amuse.datamodel import base
 from amuse.datamodel import grids
-grids.AbstractGrid.add_global_vector_attribute("position", ["x","y","z"])
-grids.AbstractGrid.add_global_vector_attribute("momentum", ["rhovx","rhovy","rhovz"])
-grids.AbstractGrid.add_global_vector_attribute("magnetic_field", ["B1i","B2i","B3i"])
+#~ grids.AbstractGrid.add_global_vector_attribute("position", ["x","y","z"])
+#~ grids.AbstractGrid.add_global_vector_attribute("momentum", ["rhovx","rhovy","rhovz"])
+#~ grids.AbstractGrid.add_global_vector_attribute("magnetic_field", ["B1i","B2i","B3i"])
 
-@grids.BaseGrid.caching_function_for_set
+@grids.AbstractGrid.caching_function_for_set
 def cellsize(grid):
     raise Exception("a {0} does not have a constant cellsize, use the cellsizes method instead".format(grid.__class__.__name__))
 
-@grids.RegularBaseGrid.caching_function_for_set
+@grids.AbstractRegularGrid.caching_function_for_set
 def cellsize(grid):
     """Returns the lenght of each direction in the grid.
     Works for regular and cartesian grids.
@@ -26,65 +26,65 @@ def cellsize(grid):
             result[i:i+1]=(cell2.position-cell1.position)[i]      
     return result
 
-@grids.BaseGrid.caching_function_for_set
+@grids.AbstractGrid.caching_function_for_set
 def get_minimum_index(grid):
     raise Exception("not implemented")
 
-@grids.StructuredBaseGrid.caching_function_for_set
+@grids.AbstractStructuredGrid.caching_function_for_set
 def get_minimum_index(grid):
     return tuple(numpy.zeros_like(grid.shape))
     
-@grids.BaseGrid.caching_function_for_set
+@grids.AbstractGrid.caching_function_for_set
 def get_maximum_index(grid):
     raise Exception("not implemented")
 
-@grids.StructuredBaseGrid.caching_function_for_set
+@grids.AbstractStructuredGrid.caching_function_for_set
 def get_maximum_index(grid):
     return tuple(grid.shape - numpy.ones_like(grid.shape))
 
-@grids.BaseGrid.caching_function_for_set
+@grids.AbstractGrid.caching_function_for_set
 def get_minimum_position(grid):
     raise Exception("not implemented")
 
-@grids.RectilinearBaseGrid.caching_function_for_set
+@grids.AbstractRectilinearGrid.caching_function_for_set
 def get_minimum_position(grid):
     return grid[grid.get_minimum_index()].position - 0.5 * grid.cellsize()
 
-@grids.BaseGrid.caching_function_for_set
+@grids.AbstractGrid.caching_function_for_set
 def get_maximum_position(grid):
     raise Exception("not implemented")
 
-@grids.RectilinearBaseGrid.caching_function_for_set
+@grids.AbstractRectilinearGrid.caching_function_for_set
 def get_maximum_position(grid):
     return grid[grid.get_maximum_index()].position + 0.5 * grid.cellsize()
 
-@grids.BaseGrid.caching_function_for_set
+@grids.AbstractGrid.caching_function_for_set
 def get_volume(grid):
     raise Exception("not implemented")
     
-@grids.RectilinearBaseGrid.caching_function_for_set
+@grids.AbstractRectilinearGrid.caching_function_for_set
 def get_volume(grid):
     maximum_position = grid.get_maximum_position()
     minimum_position = grid.get_minimum_position()
     delta = maximum_position - minimum_position
     return delta.prod()
     
-@grids.BaseGrid.function_for_set
+@grids.AbstractGrid.function_for_set
 def contains(grid, points):
     raise Exception("not implemented")
 
-@grids.RectilinearBaseGrid.function_for_set
+@grids.AbstractRectilinearGrid.function_for_set
 def contains(grid, points):
     return numpy.logical_and(
         numpy.all(points >= grid.get_minimum_position(), axis=len(points.shape)-1),
         numpy.all(points < grid.get_maximum_position(), axis=len(points.shape)-1)
     )
    
-@grids.BaseGrid.function_for_set
+@grids.AbstractGrid.function_for_set
 def points(grid):
     raise Exception("not implemented")
 
-@grids.RegularBaseGrid.function_for_set
+@grids.AbstractRegularGrid.function_for_set
 def points(grid):
     shape=grid.shape
     dx = grid.cellsize()/2
@@ -108,11 +108,11 @@ def points(grid):
 
     return result
     
-@grids.BaseGrid.function_for_set
+@grids.AbstractGrid.function_for_set
 def connectivity(grid):
     raise Exception("not implemented")
 
-@grids.RegularBaseGrid.function_for_set
+@grids.AbstractRegularGrid.function_for_set
 def connectivity(grid):
     cellcenters = grid.position
     shape = numpy.asarray(cellcenters.shape)
@@ -140,11 +140,11 @@ def connectivity(grid):
 
     return result
 
-@grids.BaseGrid.function_for_set
+@grids.AbstractGrid.function_for_set
 def overlaps(grid, grid1,eps=None):
     raise Exception("not implemented")
 
-@grids.RectilinearBaseGrid.function_for_set
+@grids.AbstractRectilinearGrid.function_for_set
 def overlaps(grid, grid1,eps=None):
     """simple test for overlap
        optional keyword parameter:
@@ -164,11 +164,11 @@ def overlaps(grid, grid1,eps=None):
       return False
     return True
     
-@grids.BaseGrid.function_for_set
+@grids.AbstractGrid.function_for_set
 def get_overlap_with(grid, grid1,eps=None):
     raise Exception("not implemented")
 
-@grids.RegularBaseGrid.function_for_set
+@grids.AbstractRegularGrid.function_for_set
 def get_overlap_with(grid, grid1,eps=None):
     """return overlapping subgrid"""
     if not grid.overlaps(grid1,eps):

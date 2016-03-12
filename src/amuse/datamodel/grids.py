@@ -221,24 +221,27 @@ class BaseGrid(AbstractGrid):
         print ("Grid.create deprecated, use new_regular_grid instead")
         return new_regular_grid(*args,**kwargs)
 
-class UnstructuredGrid(BaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(BaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
-class StructuredBaseGrid(BaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(BaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
-class StructuredGrid(StructuredBaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(StructuredBaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
-class RectilinearBaseGrid(StructuredBaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(StructuredBaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
-class RectilinearGrid(RectilinearBaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(RectilinearBaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
-class RegularBaseGrid(RectilinearBaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(RectilinearBaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
-class RegularGrid(RegularBaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(RegularBaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
-class CartesianBaseGrid(RegularBaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(RegularBaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
-class CartesianGrid(CartesianBaseGrid):
-    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(CartesianBaseGrid.GLOBAL_DERIVED_ATTRIBUTES)
+class AbstractUnstructuredGrid(AbstractGrid):
+    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(AbstractGrid.GLOBAL_DERIVED_ATTRIBUTES)
+class AbstractStructuredGrid(AbstractGrid):
+    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(AbstractGrid.GLOBAL_DERIVED_ATTRIBUTES)
+class AbstractRectilinearGrid(AbstractStructuredGrid):
+    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(AbstractStructuredGrid.GLOBAL_DERIVED_ATTRIBUTES)
+class AbstractRegularGrid(AbstractRectilinearGrid):
+    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(AbstractRectilinearGrid.GLOBAL_DERIVED_ATTRIBUTES)
+class AbstractCartesianGrid(AbstractRegularGrid):
+    GLOBAL_DERIVED_ATTRIBUTES=CompositeDictionary(AbstractRegularGrid.GLOBAL_DERIVED_ATTRIBUTES)
+
+class UnstructuredGrid(BaseGrid, AbstractUnstructuredGrid):
+    pass
+class StructuredGrid(BaseGrid, AbstractStructuredGrid):
+    pass
+class RectilinearGrid(StructuredGrid, AbstractRectilinearGrid):
+    pass
+class RegularGrid(RectilinearGrid, AbstractRegularGrid):
+    pass
+class CartesianGrid(RegularGrid,AbstractCartesianGrid):
+    pass
 
 # maintains compatibility with previous def.
 Grid=RegularGrid
@@ -490,6 +493,17 @@ class SubGrid(AbstractGrid):
 
     def _factory_for_new_collection(self):
         return Grid
+
+class UnstructuredSubGrid(SubGrid, AbstractUnstructuredGrid):
+    pass
+class StructuredSubGrid(SubGrid, AbstractStructuredGrid):
+    pass
+class RectilinearSubGrid(StructuredSubGrid, AbstractRectilinearGrid):
+    pass
+class RegularSubGrid(RectilinearSubGrid, AbstractRegularGrid):
+    pass
+class CartesianSubGrid(RegularSubGrid,AbstractCartesianGrid):
+    pass
         
 class GridPoint(object):
 

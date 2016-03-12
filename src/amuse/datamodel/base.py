@@ -685,12 +685,11 @@ class AbstractSet(object):
     __array__ = UndefinedAttribute()
     
     def __init__(self, original = None):
-        if original is None:
-            derived_attributes = self.GLOBAL_DERIVED_ATTRIBUTES
-        else:
-            derived_attributes = original._derived_attributes
+        derived_attributes = (self.GLOBAL_DERIVED_ATTRIBUTES,)
+        if original is not None:
+            derived_attributes += (original._derived_attributes,)
             
-        object.__setattr__(self, "_derived_attributes", CompositeDictionary(derived_attributes))
+        object.__setattr__(self, "_derived_attributes", CompositeDictionary(*derived_attributes))
         object.__setattr__(self, "_private", PrivateProperties())
         
         self._private.collection_attributes = CollectionAttributes()

@@ -688,6 +688,13 @@ class Athena(CommonCode):
         
         self.stopping_conditions = StoppingConditions(self)
         CommonCode.__init__(self,  AthenaInterface(**options), **options)
+    
+    def _create_new_grid(self,*args,**kwargs):
+        grid=CommonCode._create_new_grid(self,*args,**kwargs)
+        grid.add_global_vector_attribute("position", ["x","y","z"])
+        grid.add_global_vector_attribute("momentum", ["rhovx","rhovy","rhovz"])
+        grid.add_global_vector_attribute("magnetic_field", ["B1i","B2i","B3i"])
+        return grid
         
     def define_converter(self, object):
         if self.unit_converter is None:
