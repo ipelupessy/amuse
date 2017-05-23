@@ -25,3 +25,6 @@ Help on package amuse.ic in amuse:
 or (directly from the terminal):
 > pydoc amuse.ic
 """
+
+from units import units,constants,nbody_system
+import datamodel
