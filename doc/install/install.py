@@ -79,7 +79,7 @@ class InstallPrerequisites(object):
             '4.4.1',
             'v' , '.tar.gz' , 
             'https://github.com/Unidata/netcdf-c/archive/',
-            self.basic_build
+            self.netcdf_build
           ) ,
           (
             'netcdf-fortran' ,
@@ -87,7 +87,7 @@ class InstallPrerequisites(object):
             '4.4.4',
             'v' , '.tar.gz' , 
             'https://github.com/Unidata/netcdf-fortran/archive/',
-            self.basic_build
+            self.netcdf_build
           ) ,
           (
             'netcdf4-python' ,
@@ -108,9 +108,9 @@ class InstallPrerequisites(object):
           (
             'mpich2', 
             [], 
-            '3.1.4', 
+            '3.2', 
             'mpich-', '.tar.gz', 
-            'http://www.mpich.org/static/tarballs/3.1.4/', 
+            'http://www.mpich.org/static/tarballs/3.2/', 
             self.mpich2_build
           ) ,
           (
@@ -351,6 +351,29 @@ class InstallPrerequisites(object):
         
         for x in commands:
             self.run_application(x, path)
+
+    def netcdf_build(self, path):
+        env = os.environ.copy()
+        prev = ''
+        if 'LDFLAGS' in env:
+            prev = ' ' +env['LDFLAGS']
+        prev = ''
+        if 'CPPFLAGS' in env:
+            prev = ' ' +env['CPPFLAGS']
+        env['LDFLAGS'] = '-L{0}/lib'.format(self.prefix) + prev
+        env['CPPFLAGS'] = '-I{0}/include'.format(self.prefix) + prev
+        commands = []
+        command = [
+          './configure',
+          '--prefix='+self.prefix,
+          '--enable-shared'
+        ]
+        commands.append(command)
+        commands.append(['make'])
+        commands.append(['make', 'install'])
+        
+        for x in commands:
+            self.run_application(x, path, env=env)
     
     def cmake_build(self, path):
         commands = []
@@ -585,11 +608,11 @@ class InstallPrerequisitesOnOSX(InstallPrerequisites):
           '--with-device=ch3:sock',
         ]
         if self.use_hydra_process_manager:
-            command.append('--with-pm=hydra:mpd:gforker')
+            command.append('--with-pm=hydra:gforker')
         elif self.use_gforker_process_manager:
-            command.append('--with-pm=gforker:hydra:mpd')
+            command.append('--with-pm=gforker:hydra')
         else:
-            command.append('--with-pm=mpd:hydra:gforker')
+            command.append('--with-pm=hydra:gforker')
             
         commands.append(command)
         commands.append(['make'])
