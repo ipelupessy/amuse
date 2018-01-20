@@ -841,6 +841,8 @@ subroutine set_gammas(ip,He)
 
   else
 
+     ip%fracabsorb = zero
+     ip%pdepr = zero
      ip%gammasum = zero
      ip%gammaHI = zero
      if (He) then
@@ -1147,9 +1149,9 @@ subroutine ionpar2screen(ipar)
    write(*,*) ipar%HIcnt, ipar%HeIcnt, ipar%HeIIcnt 
    write(*,*) ipar%HIfrac,ipar%HeIfrac,ipar%HeIIfrac
    write(*,*)
-   write(*,*) "sigmas (HI,HeI,HeII) / Gammas (HI,HeI,HeII)"
-   write(*,*) ipar%sigmaHI, ipar%sigmaHeI, ipar%sigmaHeII
-   write(*,*) ipar%gammaHI, ipar%gammaHeI, ipar%gammaHeII
+   write(*,*) "sigmas (HI,HeI,HeII, dust) / Gammas (HI,HeI,HeII, dust)"
+   write(*,*) ipar%sigmaHI, ipar%sigmaHeI, ipar%sigmaHeII, ipar%sigmaDust
+   write(*,*) ipar%gammaHI, ipar%gammaHeI, ipar%gammaHeII, ipar%gammaDust
    write(*,*)
    write(*,*) "GGp (HI,HeI,HeII) / RRb (HII,HeII,HeIII)"
    write(*,*) ipar%GGp, ipar%GGIp, ipar%GGIIp
