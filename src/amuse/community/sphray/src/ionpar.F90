@@ -779,7 +779,7 @@ subroutine set_taus(ip,He)
   else if (ip%tauHeII > TAU_HIGH) then
       ip%Dusttaufac = one
   else
-      ip%Dusttaufac = one - exp(-ip%tauHeII)
+      ip%Dusttaufac = one - exp(-ip%tauDust)
   end if
   
   ip%taufacsum = ip%HItaufac + ip%HeItaufac + ip%HeIItaufac + ip%Dusttaufac
