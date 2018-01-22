@@ -139,7 +139,7 @@ type ionpart_type
    real(r8b) :: HeIfrac      !< fraction of photons absorbed by HeI
    real(r8b) :: HeIIfrac     !< fraction of photons absorbed by HeII
     
-   real(r8b) :: gammaDust    !< Dust photoabsorption rate
+   real(r8b) :: gammaDust    !< Dust photoabsorption rate per H
    real(r8b) :: gammaHI      !< HI   photoionization rate
    real(r8b) :: gammaHeI     !< HeI  photoionization rate
    real(r8b) :: gammaHeII    !< HeII photoionization rate
@@ -679,6 +679,7 @@ subroutine set_taus(ip,He)
   ! calculate atom counts
   !---------------------------------------
   ip%HIcnt = ip%Hcnt * ip%xHI       
+  ip%HIIcnt = ip%Hcnt - ip%HIcnt      
   if (He) then
      ip%HeIcnt  = ip%Hecnt * ip%xHeI        
      ip%HeIIcnt = ip%Hecnt * ip%xHeII          
@@ -717,7 +718,7 @@ subroutine set_taus(ip,He)
   end if
   
   ! calculate dust optical depth,scales with total H (alternative: scale with HI only)
-  ip%tauDust = ip%cdfac * (ip%HIcnt + ip%HIIcnt) * ip%sigmaDust
+  ip%tauDust = ip%cdfac * ip%Hcnt * ip%sigmaDust
   
   ip%tausum = ip%tauHI + ip%tauHeI + ip%tauHeII + ip%tauDust
 
@@ -830,14 +831,20 @@ subroutine set_gammas(ip,He)
      end if
 
      ip%pdepr    = ip%pflux * ip%fracabsorb
-     ip%gammasum = ip%pdepr / ip%Allcnt
+
+     if(ip%Allcnt > zero) then
+        ip%gammasum = ip%pdepr * (ip%HIfrac + ip%HeIfrac + ip%HeIIfrac) / ip%Allcnt
+     else
+        ip%gammasum = zero
+     endif
 
      ip%gammaHI = ip%gammasum * ip%HIfrac 
      if (He) then
         ip%gammaHeI  = ip%gammasum * ip%HeIfrac 
         ip%gammaHeII = ip%gammasum * ip%HeIIfrac 
      end if
-     ip%gammaDust = ip%gammasum * ip%Dustfrac
+     
+     ip%gammaDust = ip%pdepr * ip%Dustfrac / ip%Hcnt 
 
   else
 

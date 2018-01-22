@@ -221,7 +221,7 @@ subroutine eulerint(ip,scalls,photo,caseA,He,isoT,fixT)
            ip%pdeps = ip%pdeps + ip%gammaHeI  * ip%HeIcnt  * dt_i
            ip%pdeps = ip%pdeps + ip%gammaHeII * ip%HeIIcnt * dt_i
         end if
-        ip%pdeps = ip%pdeps + ip%gammaDust * (ip%HIcnt + ip%HIIcnt)* dt_i
+        ip%pdeps = ip%pdeps + ip%gammaDust * ip%Hcnt * dt_i
      end if
 
 

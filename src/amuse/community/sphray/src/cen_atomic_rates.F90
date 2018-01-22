@@ -360,7 +360,7 @@ contains
 !> dust photo cross section per H [cm^2]
   function dust_photo_cs( Ry, dust_to_gas_ratio ) result( sigma)
     real(r8b), intent(in) :: Ry  !< energy [Rydbergs]
-    real(r8b), intent(in) :: dust_to_gas_ratio  !< energy [Rydbergs]
+    real(r8b), intent(in) :: dust_to_gas_ratio  !< dust to gas ratio (rho_dust/rho_gas)
     real(r8b) :: sigma           !< cross section [cm^2]
 
     real(r8b) :: eV
