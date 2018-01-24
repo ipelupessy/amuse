@@ -833,7 +833,7 @@ subroutine set_gammas(ip,He)
      ip%pdepr    = ip%pflux * ip%fracabsorb
 
      if(ip%Allcnt > zero) then
-        ip%gammasum = ip%pdepr * (ip%HIfrac + ip%HeIfrac + ip%HeIIfrac) / ip%Allcnt
+        ip%gammasum = ip%pdepr / ip%Allcnt
      else
         ip%gammasum = zero
      endif
@@ -844,7 +844,7 @@ subroutine set_gammas(ip,He)
         ip%gammaHeII = ip%gammasum * ip%HeIIfrac 
      end if
      
-     ip%gammaDust = ip%pdepr * ip%Dustfrac / ip%Hcnt 
+     ip%gammaDust = ip%pdepr * ip%Dustfrac / ip%Hcnt
 
   else
 

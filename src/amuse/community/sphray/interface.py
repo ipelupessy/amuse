@@ -571,7 +571,7 @@ class SPHRay(CommonCode):
             "get_dust_to_gas_ratio",
             "set_dust_to_gas_ratio", 
             "dust_to_gas_ratio", 
-            "dust to gas mass-ratio expressed as dust particles per HI", 
+            "dust to gas mass-ratio expressed as rho_dust/rho_gas", 
             default_value = 0.0 
         )
         
