@@ -439,12 +439,13 @@ class ParameterDefinition(AbstractParameterDefinition):
         return False
     
 class InterfaceParameterDefinition(ParameterDefinition):
-    def __init__(self, name, description, default_value,state_guard=None):
+    def __init__(self, name, description, default_value,state_guard=None, post_call=None):
         AbstractParameterDefinition.__init__(self, name, description)
         self.default_value = default_value
         self.must_set_before_get = False
         self.value=default_value
         self.state_guard=state_guard
+        self.post_call=post_call
         
     def get_value(self, parameter, object):
         try:
@@ -460,7 +461,9 @@ class InterfaceParameterDefinition(ParameterDefinition):
           self.value=quantity.copy()
         except:
           self.value=quantity
-
+        if self.post_call:
+          getattr(object, self.post_call)()
+          
     def must_set_to_default_if_not_set(self):
         return False
 
