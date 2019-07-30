@@ -8,6 +8,8 @@ from amuse.datamodel import parameters
 from amuse.support.interface import HandleParameters
 from amuse.support.interface import InCodeComponentImplementation
 
+from amuse.support import options
+options.GlobalOptions.instance().override_value_for_option("ignore_unknown_parameters", True)
 
 class BaseTestModule(object):
     def before_get_parameter(self):

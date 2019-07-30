@@ -1,13 +1,22 @@
 import weakref
 import numpy
+from amuse.support.options import option, OptionalAttributes
 from amuse.units import nbody_system
 from amuse.units import generic_unit_system
 from amuse.units import quantities
 from amuse.units.core import IncompatibleUnitsException
 from amuse.units.quantities import is_quantity
 from amuse.support import exceptions
+import warnings
 
 from amuse.support.core import OrderedDictionary
+
+class ParameterOptions(OptionalAttributes):
+    @option(type="boolean", sections=("parameters",))
+    def ignore_unknown_parameters(self):
+        return False
+
+_parameteroptions=ParameterOptions()
 
 class Parameters(object):
     __name__ = 'Parameters'
@@ -17,7 +26,7 @@ class Parameters(object):
         object.__setattr__(self, '_definitions', definitions)
         object.__setattr__(self, '_mapping_from_name_to_definition', OrderedDictionary())
         object.__setattr__(self, '_mapping_from_name_to_parameter', OrderedDictionary())
-
+        
         self.update()
 
     def update(self):
@@ -31,7 +40,10 @@ class Parameters(object):
         #if name.startswith('__'):
         #    return object.__getattribute__(self, name)
         if not name in self._mapping_from_name_to_definition:
-            raise exceptions.CoreException("tried to get unknown parameter '{0}' for a '{1}' object".format(name, type(self._instance()).__name__))
+            if _parameteroptions.ignore_unknown_parameters:
+                warnings.warn("tried to set unknown parameter '{0}' for a '{1}' object".format(name, type(self._instance()).__name__), exceptions.AmuseWarning) 
+            else:
+                raise exceptions.CoreException("tried to get unknown parameter '{0}' for a '{1}' object".format(name, type(self._instance()).__name__))
         
         self._instance().before_get_parameter()
         
@@ -41,7 +53,10 @@ class Parameters(object):
         if not name in self._mapping_from_name_to_definition:
             #~ print "Did you mean to set one of these parameters?\n", \
                 #~ "\n  ".join(self._mapping_from_name_to_definition.keys())
-            raise exceptions.CoreException("tried to set unknown parameter '{0}' for a '{1}' object".format(name, type(self._instance()).__name__))
+            if _parameteroptions.ignore_unknown_parameters:
+                warnings.warn("tried to set unknown parameter '{0}' for a '{1}' object".format(name, type(self._instance()).__name__), exceptions.AmuseWarning) 
+            else:
+                raise exceptions.CoreException("tried to set unknown parameter '{0}' for a '{1}' object".format(name, type(self._instance()).__name__))
         
         self._instance().before_set_parameter()
 
@@ -171,9 +186,6 @@ class Parameters(object):
             return False
         return not self.get_parameter(name).is_readonly()
 
-
-
-
 class ParametersMemento(object):
     __name__ = 'Parameters'
     
@@ -198,7 +210,11 @@ class ParametersMemento(object):
 
     def __setattr__(self, name, value):
         if not name in self._mapping_from_name_to_value:
-            raise exceptions.CoreException("tried to set unknown parameter '{0}'".format(name))
+            if _parameteroptions.ignore_unknown_parameters:
+                warnings.warn("tried to set unknown parameter '{0}'".format(name), exceptions.AmuseWarning)
+                return
+            else:
+                raise exceptions.CoreException("tried to set unknown parameter '{0}'".format(name))
             
         self._mapping_from_name_to_value[name] = value
 
@@ -230,12 +246,7 @@ class ParametersMemento(object):
             output += str(getattr(self, name))+"\n"
 
         return output
-
     
-    
-
-    
-
 def new_parameters_instance_with_docs(definitions, instance):
     
     class _ParametersMetaclass(type):
