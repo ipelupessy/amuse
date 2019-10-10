@@ -13,6 +13,10 @@ from amuse.support.interface import InCodeComponentImplementation
 
 from amuse.io import read_set_from_file, write_set_to_file
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("code").setLevel(logging.DEBUG)
+
 from collections import namedtuple
 import numpy
 import pickle
@@ -22,11 +26,12 @@ except ImportError:
     MPI = None
     
 import base64
+import time
 
 def dump_and_encode(x):
-  return base64.b64encode(pickle.dumps(x,0)).decode("ascii") # -1 does not work with sockets channel
+  return pickle.dumps(x,0) # -1 does not work with sockets channel
 def decode_and_load(x):
-  return pickle.loads(base64.b64decode(x.encode("ascii")))
+  return pickle.loads(x.encode("utf-8"))
 
 class DistributedParticlesInterface(PythonCodeInterface):
     
@@ -523,7 +528,7 @@ class TestDistributedParticles(TestWithMPI):
     def test2(self):
         x = DistributedParticles(
             size = 3,
-            number_of_workers = 1
+            number_of_workers = 1,
         )
         self.assertEqual(len(x) , 3)
         x.mass = 10 | units.MSun

@@ -214,7 +214,7 @@ class HandleConvertUnits(HandleCodeInterfaceAttributeAccess, CodeMethodWrapperDe
             result = CodeMethodWrapper(attribute, self)
         elif isinstance(attribute, parameters.Parameters):
             result = parameters.new_parameters_with_units_converted_instance_with_docs(attribute, self.converter)
-        elif isinstance(attribute, str):
+        elif isinstance(attribute, (str, bytes)):
             result = attribute
         elif isinstance(attribute, bytearray):
             result = attribute
@@ -274,7 +274,7 @@ class HandleConvertUnits(HandleCodeInterfaceAttributeAccess, CodeMethodWrapperDe
                 return x
             else:
                 return self.converter.from_target_to_source(x)
-        elif isinstance(x, str):
+        elif isinstance(x, (str, bytes)):
             return x
         elif isinstance(x, numpy.ndarray):
             return x

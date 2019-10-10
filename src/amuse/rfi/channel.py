@@ -74,7 +74,6 @@ class AbstractMessage(object):
         
         self.encoded_units = encoded_units
         
-
     def pack_data(self, dtype_to_arguments):
         for dtype, attrname in self.dtype_to_message_attribute():
             if dtype in dtype_to_arguments:
@@ -89,7 +88,7 @@ class AbstractMessage(object):
                 dtype_to_result[dtype] = unpack_array(result , self.call_count, dtype)
             else:
                 dtype_to_result[dtype] = result
-                    
+
         return dtype_to_result
     
     def dtype_to_message_attribute(self):
@@ -220,9 +219,9 @@ class MPIMessage(AbstractMessage):
             strings = []
             begin = 0
             for size in sizes:
-                strings.append(data_bytes[begin:begin + size].tostring().decode('latin_1'))
+                strings.append(data_bytes[begin:begin + size].tostring().decode('utf-8'))
                 begin = begin + size + 1
-                
+            
             logger.debug("got %d strings of size %s, data = %s", total, sizes, strings)
             return strings
         else:
@@ -291,8 +290,9 @@ class MPIMessage(AbstractMessage):
             
         lengths = numpy.array( [len(s) for s in array] ,dtype='i')
         
-        chars=(chr(0).join(array)+chr(0)).encode("utf-8")
-        chars = numpy.fromstring(chars, dtype='uint8')
+        array=[bytes(x, "utf-8") if isinstance(x,str) else x for x in array]
+        
+        chars = numpy.frombuffer(b'\x00'.join(array)+b'\x00', dtype='uint8')
 
         if len(chars) != lengths.sum()+len(lengths):
             raise Exception("send_strings size mismatch {0} vs {1}".format( len(chars) , lengths.sum()+len(lengths) ))
@@ -382,11 +382,11 @@ MAPPING = {}
 
 def pack_array(array, length, dtype):
     if dtype == 'string':
-        if length == 1 and len(array) > 0 and isinstance(array[0], str):
+        if length == 1 and len(array) > 0 and isinstance(array[0], (str, bytes)):
             return array
         result = []
         for x in array:
-            if isinstance(x, str):
+            if isinstance(x, (str, bytes)):
                 for _ in range(length):
                     result.append(x)
             elif len(x) == 1 and length > 1:
@@ -736,7 +736,7 @@ Please do a 'make clean; make' in the root directory.
                 result = 1
                 for argument_value in argument_values:
                     try:
-                        if not isinstance(argument_value, str):
+                        if not isinstance(argument_value, (str, bytes)):
                             result = max(result, len(argument_value))
                     except:
                         result = max(result, 1)
@@ -1073,25 +1073,7 @@ class MpiChannel(AbstractMessageChannel):
                 
             self.intercomm = None
     
-    def determine_length_from_datax(self, dtype_to_arguments):
-        def get_length(x):
-            if x:
-                try:
-                    if not isinstance(x[0], str):
-                        return len(x[0])
-                except:
-                    return 1
-            return 1
-               
-               
-        
-        lengths = [get_length(x) for x in dtype_to_arguments.values()]
-        if len(lengths) == 0:
-            return 1
-            
-        return max(1, max(lengths))
-        
-        
+
     def send_message(self, call_id, function_id, dtype_to_arguments={}, encoded_units = ()):
 
         
@@ -1666,7 +1648,9 @@ class SocketMessage(AbstractMessage):
         if len(array) > 0:
             
             lengths = numpy.array( [len(s) for s in array] ,dtype='int32')
-            chars=(chr(0).join(array)+chr(0)).encode("utf-8")
+
+            array=[bytes(x, "utf-8") if isinstance(x, str) else x for x in array]        
+            chars = b'\x00'.join(array)+b'\x00'
             
             if len(chars) != lengths.sum()+len(lengths):
                 raise Exception("send_strings size mismatch {0} vs {1}".format( len(chars) , lengths.sum()+len(lengths) ))
@@ -1874,28 +1858,7 @@ class SocketChannel(AbstractMessageChannel):
     
     def is_inuse(self):
         return self._is_inuse
-    
-    def determine_length_from_datax(self, dtype_to_arguments):
-        def get_length(type_and_values):
-            argument_type, argument_values = type_and_values
-            if argument_values:
-                result = 1
-                for argument_value in argument_values:
-                    try:
-                        if not isinstance(argument_value, str):
-                            result = max(result, len(argument_value))
-                    except:
-                        result = max(result, 1)
-                return result
-               
-               
-        
-        lengths = [get_length(x) for x in dtype_to_arguments.items()]
-        if len(lengths) == 0:
-            return 1
-            
-        return max(1, max(lengths))
-    
+
     def send_message(self, call_id, function_id, dtype_to_arguments={}, encoded_units = ()):
         
         call_count = self.determine_length_from_data(dtype_to_arguments)
@@ -2210,24 +2173,7 @@ class DistributedChannel(AbstractMessageChannel):
     
     def is_inuse(self):
         return self._is_inuse
-    
-    def determine_length_from_datax(self, dtype_to_arguments):
-        def get_length(x):
-            if x:
-                try:
-                    if not isinstance(x[0], str):
-                        return len(x[0])
-                except:
-                    return 1
-               
-               
-        
-        lengths = [get_length(x) for x in dtype_to_arguments.values()]
-        if len(lengths) == 0:
-            return 1
-            
-        return max(1, max(lengths))
-    
+
     def send_message(self, call_id, function_id, dtype_to_arguments={}, encoded_units = None):
         
         call_count = self.determine_length_from_data(dtype_to_arguments)
@@ -2378,33 +2324,9 @@ class LocalChannel(AbstractMessageChannel):
             return output_message.to_result(handle_as_array),output_message.encoded_units
         else:
             return output_message.to_result(handle_as_array)
-    
-    
-
 
     def nonblocking_recv_message(self, call_id, function_id, handle_as_array):
         pass
-
-
-    def determine_length_from_datax(self, dtype_to_arguments):
-        def get_length(x):
-            if x:
-                try:
-                    if not isinstance(x[0], str):
-                        return len(x[0])
-                except:
-                    return 1
-            return 1
-               
-               
-        
-        lengths = [get_length(x) for x in dtype_to_arguments.values()]
-        if len(lengths) == 0:
-            return 1
-            
-        return max(1, max(lengths))
-        
-        
 
     def is_polling_supported(self):
         return False

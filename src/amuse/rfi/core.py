@@ -181,7 +181,7 @@ class CodeFunction(object):
                 count = 0
                 for argument_value in argument_values:
                     try:
-                        if not isinstance(argument_value, str):
+                        if not isinstance(argument_value, (str, bytes)):
                             count = max(count, len(argument_value))
                     except:
                         count = max(count, 0)
@@ -406,7 +406,7 @@ def derive_dtype_unit_and_default(value):
               dtype="i"
           elif isinstance(number,float):
               dtype="d"
-          elif isinstance(number,str):
+          elif isinstance(number, (str, bytes)):
               dtype="s"
           else:
               raise Exception("undetectable type")
@@ -1241,7 +1241,7 @@ class CodeFunctionWithUnits(CodeFunction):
                 count = 0
                 for argument_value in argument_values:
                     try:
-                        if not isinstance(argument_value, str):
+                        if not isinstance(argument_value, (str, bytes)):
                             count = max(count, len(argument_value))
                     except:
                         count = max(count, 0)
