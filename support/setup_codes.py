@@ -36,6 +36,7 @@ from distutils.command.build import build
 from distutils.command.clean import clean
 from distutils.command.install import install
 from setuptools.command.develop import develop
+from setuptools.dist import Distribution
 
 from subprocess import call, Popen, PIPE, STDOUT
 
@@ -1281,3 +1282,8 @@ def setup_commands():
 
     
     return mapping_from_command_name_to_command_class
+
+class _Distribution(Distribution):
+    """Distribution which always forces a binary package with platform name"""
+    def has_ext_modules(foo):
+        return True

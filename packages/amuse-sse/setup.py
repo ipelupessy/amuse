@@ -7,7 +7,7 @@ from setuptools import setup
 
 import support
 support.use("system")
-from support.setup_codes import setup_commands
+from support.setup_codes import setup_commands, _Distribution
 
 name = 'amuse-sse'
 author = 'The AMUSE team'
@@ -52,4 +52,5 @@ setup(
     packages=packages,
     package_data=package_data,
     data_files=all_data_files,
+    distclass=_Distribution,
 )
